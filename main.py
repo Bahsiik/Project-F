@@ -15,7 +15,7 @@ redSquare = pygame.Surface((100, 100))
 redSquare.fill((255, 0, 0))
 redSquareX = 100
 redSquareY = 250
-redSquareYChange = 0
+redSquareYChange = 5
 
 
 def displayRedSquare(x, y):
@@ -82,9 +82,6 @@ while running:
     clock.tick(60)
     screen.fill((0, 0, 0))
 
-    # This is checking for events. If the event is the user closing the window, it will stop the game. If the event
-    # is the user pressing the space bar, it will move the red square up. If the event is the user releasing the
-    # space bar, it will move the red square down.
     for event in pygame.event.get():
 
         # This is checking if the user has closed the window. If they have, it will stop the game.
@@ -108,6 +105,13 @@ while running:
         redSquareY = 600
     if redSquareY < 0:
         redSquareY = 0
+
+    if score > 20:
+        obstacleXChange = -6
+    if score > 50:
+        obstacleXChange = -7
+    if score > 100:
+        obstacleXChange = -8
 
     # This is moving the obstacle to the left and resetting it when it goes off the screen.
     obstacleX += obstacleXChange
