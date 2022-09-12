@@ -5,135 +5,79 @@ pygame.init()
 
 # This is setting the screen size to 500 by 700, setting the game to running, and setting the clock.
 screen = pygame.display.set_mode((500, 700))
-running = True
 clock = pygame.time.Clock()
+game_font = "freesansbold.ttf"
+title = pygame.font.SysFont(game_font, 100)
 
 
-# This is creating a red square that is 100 by 100 pixels. It is setting the red square's x and y coordinates to
-# 100 and 250. It is also setting the red square's y change to 0.
-redSquare = pygame.Surface((100, 100))
-redSquare.fill((255, 0, 0))
-redSquareX = 100
-redSquareY = 250
-redSquareYChange = 5
+class Button:
+    def __init__(self, x_pos, y_pos, width, height, text, background_color, text_color, font, font_size, hover_color):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.width = width
+        self.height = height
+        self.text = text
+        self.background_color = background_color
+        self.text_color = text_color
+        self.font = font
+        self.font_size = font_size
+        self.hover_color = hover_color
 
+    def draw(self):
+        pygame.draw.rect(screen, self.background_color, (self.x_pos, self.y_pos, self.width, self.height))
+        text = self.font.render(self.text, True, self.text_color)
+        text_rect = text.get_rect(center=(self.x_pos + self.width / 2, self.y_pos + self.height / 2))
+        screen.blit(text, text_rect)
 
-def displayRedSquare(x, y):
-    """
-    "Display the red square at the given x and y coordinates."
-
-    :param x: The x coordinate of the top left corner of the square
-    :param y: The y coordinate of the top left corner of the square
-    """
-    screen.blit(redSquare, (x, y))
-
-
-# Creating the obstacle.
-obstacleWidth = 60
-obstacleHeight = random.randint(150, 450)
-obstacleColor = (0, 255, 0)
-obstacleXChange = -5
-obstacleX = 500
-
-
-def displayObstacle(topObstacleHeight):
-    """
-    It draws two rectangles, one on the top and one on the bottom, to create the illusion of a single obstacle
-
-    :param topObstacleHeight: The height of the top obstacle
-    """
-    pygame.draw.rect(screen, obstacleColor, (obstacleX, 0, obstacleWidth, topObstacleHeight))
-    bottomObstacleY = topObstacleHeight + 250
-    bottomObstacleHeight = 700 - bottomObstacleY
-    pygame.draw.rect(screen, obstacleColor, (obstacleX, bottomObstacleY, obstacleWidth, bottomObstacleHeight))
-
-
-def detectCollision(topObstacleHeight, bottomObstacleHeight):
-    """
-    If the red square is within the obstacle's x-coordinate range and the red square's y-coordinate is either above the top
-    obstacle or below the bottom obstacle, then the red square has collided with the obstacle
-
-    :param topObstacleHeight: The height of the top obstacle
-    :param bottomObstacleHeight: The height of the bottom obstacle
-    :return: a boolean value.
-    """
-    if 100 <= obstacleX <= 200:
-        if redSquareY <= topObstacleHeight or redSquareY >= (bottomObstacleHeight - 100):
+    def is_hovered(self):
+        mouse_pos = pygame.mouse.get_pos()
+        if self.x_pos < mouse_pos[0] < self.x_pos + self.width and self.y_pos < mouse_pos[1] < self.y_pos + self.height:
+            self.background_color = self.hover_color
             return True
-    return False
+        else:
+            self.background_color = (0, 0, 0)
+            return False
+
+    def is_clicked(self):
+        click = pygame.mouse.get_pressed()
+        if click[0] == 1 and self.is_hovered():
+            return True
+        else:
+            return False
 
 
-# Creating a variable called score and setting it to 0. It is also creating a variable called scoreText and
-# setting it to a font.
-score = 0
-scoreText = pygame.font.Font('freesansbold.ttf', 32)
+def menu():
+    pygame.display.set_caption("Project F")
+    titleText = title.render("Project F", True, (0, 0, 200))
+    titleRect = titleText.get_rect(center=(250, 100))
+    play_button = Button(150, 225, 200, 100, "Play", (0, 0, 0), (255, 255, 255),
+                         pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
+    score_button = Button(150, 375, 200, 100, "Score", (0, 0, 0), (255, 255, 255),
+                          pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
+    quit_button = Button(150, 525, 200, 100, "Quit", (0, 0, 0), (255, 255, 255),
+                         pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+        screen.fill((25, 25, 35))
+        screen.blit(titleText, titleRect)
+        play_button.draw()
+        play_button.is_hovered()
+        # if play_button.is_clicked():
+        # game()
+        score_button.draw()
+        score_button.is_hovered()
+        # if score_button.is_clicked():
+        # score()
+        quit_button.draw()
+        quit_button.is_hovered()
+        if quit_button.is_clicked():
+            pygame.quit()
+            quit()
+        pygame.display.update()
+        clock.tick(60)
 
 
-def displayScore():
-    """
-    It creates a surface with the text "Score: [score]" and then blits it to the screen at the coordinates (10, 10)
-    """
-    scoreTextSurface = scoreText.render(f"Score: {score}", True, (255, 255, 255))
-    screen.blit(scoreTextSurface, (10, 10))
-
-
-# This is the main game loop. It is checking for events, updating the game, and displaying the game.
-while running:
-    clock.tick(60)
-    screen.fill((0, 0, 0))
-
-    for event in pygame.event.get():
-
-        # This is checking if the user has closed the window. If they have, it will stop the game.
-        if event.type == pygame.QUIT:
-            running = False
-
-        # This is checking if the space bar is pressed. If it is, the red square will move up.
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                redSquareYChange = -9
-
-        # This is checking if the space bar is released. If it is, the red square will move down.
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
-                redSquareYChange = 5
-
-    # This is checking if the red square is going out of bounds. If it is, it will set the red square to the edge of the
-    # screen.
-    redSquareY += redSquareYChange
-    if redSquareY > 600:
-        redSquareY = 600
-    if redSquareY < 0:
-        redSquareY = 0
-
-    if score > 20:
-        obstacleXChange = -6
-    if score > 50:
-        obstacleXChange = -7
-    if score > 100:
-        obstacleXChange = -8
-
-    # This is moving the obstacle to the left and resetting it when it goes off the screen.
-    obstacleX += obstacleXChange
-    if obstacleX < -100:
-        obstacleX = 500
-        obstacleHeight = random.randint(200, 400)
-        score += 1
-
-    # Displaying the obstacle, the red square, and the score.
-    displayObstacle(obstacleHeight)
-    displayRedSquare(redSquareX, redSquareY)
-    displayScore()
-
-    # This is checking if the red square has collided with the obstacle. If it has, it will print "Collision!" and
-    # stop the game.
-    collision = detectCollision(obstacleHeight, obstacleHeight + 250)
-    if collision:
-        print("Collision!")
-        running = False
-
-    # Updating the display.
-    pygame.display.update()
-
-# Quitting pygame.
-pygame.quit()
+menu()
