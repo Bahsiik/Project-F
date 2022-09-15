@@ -1,13 +1,11 @@
-import pygame
 import random
 
-pygame.init()
+import pygame
 
-# This is setting the screen size to 500 by 700, setting the game to running, and setting the clock.
+pygame.init()
+pygame.display.set_caption("Project F")
 screen = pygame.display.set_mode((500, 700))
 clock = pygame.time.Clock()
-game_font = "freesansbold.ttf"
-title = pygame.font.SysFont(game_font, 100)
 
 
 class Button:
@@ -46,38 +44,150 @@ class Button:
             return False
 
 
-def menu():
-    pygame.display.set_caption("Project F")
-    titleText = title.render("Project F", True, (0, 0, 200))
-    titleRect = titleText.get_rect(center=(250, 100))
-    play_button = Button(150, 225, 200, 100, "Play", (0, 0, 0), (255, 255, 255),
-                         pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
-    score_button = Button(150, 375, 200, 100, "Score", (0, 0, 0), (255, 255, 255),
-                          pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
-    quit_button = Button(150, 525, 200, 100, "Quit", (0, 0, 0), (255, 255, 255),
-                         pygame.font.SysFont(game_font, 70), 70, (0, 0, 150))
+def main_menu():
+    title_font = pygame.font.SysFont(None, 100)
+    game_font = pygame.font.SysFont(None, 70)
+    play_button = Button(150, 225, 200, 100, "Play", (0, 0, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    score_button = Button(150, 375, 200, 100, "Score", (0, 0, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    quit_button = Button(150, 525, 200, 100, "Quit", (0, 0, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
     while True:
+        screen.fill((25, 25, 35))
+
+        titleText = title_font.render("Project F", True, (0, 0, 200))
+        titleRect = titleText.get_rect(center=(250, 100))
+        screen.blit(titleText, titleRect)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-        screen.fill((25, 25, 35))
-        screen.blit(titleText, titleRect)
+
         play_button.draw()
         play_button.is_hovered()
-        # if play_button.is_clicked():
-        # game()
+        if play_button.is_clicked():
+            game()
+
         score_button.draw()
         score_button.is_hovered()
         # if score_button.is_clicked():
         # score()
+
         quit_button.draw()
         quit_button.is_hovered()
         if quit_button.is_clicked():
             pygame.quit()
             quit()
+
         pygame.display.update()
         clock.tick(60)
 
 
-menu()
+def game():
+    score = 0
+    scoreText = pygame.font.Font('freesansbold.ttf', 32)
+
+    redSquare = pygame.Surface((100, 100))
+    redSquare.fill((255, 0, 0))
+    redSquareX = 100
+    redSquareY = 250
+    redSquareYChange = 5
+
+    obstacleWidth = 60
+    obstacleHeight = random.randint(150, 450)
+    obstacleColor = (0, 255, 0)
+    obstacleXChange = -5
+    obstacleX = 500
+
+    running = True
+    scoreFlag = False
+    pauseFlag = False
+
+    while running:
+        clock.tick(60)
+        screen.fill((0, 0, 0))
+
+        screen.blit(redSquare, (redSquareX, redSquareY))
+        displayObstacle(obstacleHeight, obstacleX, obstacleColor, obstacleWidth)
+        displayScore(scoreText, score)
+
+        for event in pygame.event.get():
+
+            # This is checking if the user has closed the window. If they have, it will stop the game.
+            if event.type == pygame.QUIT:
+                running = False
+
+            # This is checking if the space bar is pressed. If it is, the red square will move up.
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if not pauseFlag:
+                        redSquareYChange = -9
+
+            # This is checking if the space bar is released. If it is, the red square will move down.
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    if not pauseFlag:
+                        redSquareYChange = 5
+
+            # This is checking if the user has pressed the escape key. If they have, it will pause the game.
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if not pauseFlag:
+                        pauseFlag = True
+                        redSquareYChange = 0
+                        obstacleXChange = 0
+                    else:
+                        pauseFlag = False
+                        redSquareYChange = 5
+                        obstacleXChange = -5
+
+        redSquareY += redSquareYChange
+        if redSquareY > 600:
+            redSquareY = 600
+        if redSquareY < 0:
+            redSquareY = 0
+
+        obstacleX += obstacleXChange
+        if obstacleX < 40 and not scoreFlag:
+            score += 1
+            scoreFlag = True
+
+        if obstacleX < -60:
+            obstacleX = 500
+            obstacleHeight = random.randint(200, 400)
+            scoreFlag = False
+
+        if detectCollision(obstacleHeight, obstacleHeight + 250, obstacleX, redSquareY):
+            obstacleXChange = 0
+            redSquareYChange = 0
+        else:
+            if score > 20:
+                obstacleXChange = -6
+            if score > 50:
+                obstacleXChange = -7
+            if score > 100:
+                obstacleXChange = -8
+
+        # Updating the display.
+        pygame.display.update()
+
+
+def displayObstacle(topObstacleHeight, obstacleX, obstacleColor, obstacleWidth):
+    pygame.draw.rect(screen, obstacleColor, (obstacleX, 0, obstacleWidth, topObstacleHeight))
+    bottomObstacleY = topObstacleHeight + 250
+    bottomObstacleHeight = 700 - bottomObstacleY
+    pygame.draw.rect(screen, obstacleColor, (obstacleX, bottomObstacleY, obstacleWidth, bottomObstacleHeight))
+
+
+def detectCollision(topObstacleHeight, bottomObstacleHeight, obstacleX, redSquareY):
+    if 40 <= obstacleX <= 200:
+        if redSquareY <= topObstacleHeight or redSquareY >= (bottomObstacleHeight - 100):
+            return True
+    return False
+
+
+def displayScore(scoreText, score):
+    scoreTextSurface = scoreText.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(scoreTextSurface, (10, 10))
+
+
+main_menu()
