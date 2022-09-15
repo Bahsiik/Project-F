@@ -16,6 +16,7 @@ class Button:
         self.height = height
         self.text = text
         self.background_color = background_color
+        self.saved_background_color = background_color
         self.text_color = text_color
         self.font = font
         self.font_size = font_size
@@ -33,7 +34,7 @@ class Button:
             self.background_color = self.hover_color
             return True
         else:
-            self.background_color = (0, 0, 0)
+            self.background_color = self.saved_background_color
             return False
 
     def is_clicked(self):
@@ -133,10 +134,7 @@ def game():
                 if event.key == pygame.K_ESCAPE:
                     if not pauseFlag:
                         pauseFlag = True
-                        redSquareYChange = 0
-                        obstacleXChange = 0
-                    else:
-                        pauseFlag = False
+                        pauseFlag = pause_menu()
                         redSquareYChange = 5
                         obstacleXChange = -5
 
@@ -188,6 +186,39 @@ def detectCollision(topObstacleHeight, bottomObstacleHeight, obstacleX, redSquar
 def displayScore(scoreText, score):
     scoreTextSurface = scoreText.render(f"Score: {score}", True, (255, 255, 255))
     screen.blit(scoreTextSurface, (10, 10))
+
+
+def pause_menu():
+    pause_font = pygame.font.SysFont(None, 100)
+    game_font = pygame.font.SysFont(None, 70)
+    resume_button = Button(150, 225, 200, 100, "Resume", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    quit_button = Button(150, 375, 200, 100, "Quit", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    while True:
+
+        titleText = pause_font.render("Paused", True, (0, 0, 200))
+        titleRect = titleText.get_rect(center=(250, 100))
+        screen.blit(titleText, titleRect)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return False
+
+        resume_button.draw()
+        resume_button.is_hovered()
+        if resume_button.is_clicked():
+            return False
+
+        quit_button.draw()
+        quit_button.is_hovered()
+        if quit_button.is_clicked():
+            main_menu()
+
+        pygame.display.update()
+        clock.tick(60)
 
 
 main_menu()
