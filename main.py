@@ -236,8 +236,8 @@ def pause_menu():
 def loose_menu(score):
     loose_font = pygame.font.SysFont(None, 100)
     game_font = pygame.font.SysFont(None, 70)
-    play_again_button = Button(150, 275, 200, 100, "Retry", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
-    quit_button = Button(150, 425, 200, 100, "Quit", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    play_again_button = Button(150, 350, 200, 100, "Retry", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    quit_button = Button(150, 500, 200, 100, "Quit", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
     while True:
 
         titleText = loose_font.render("You Loose", True, (0, 0, 200))
@@ -247,6 +247,10 @@ def loose_menu(score):
         scoreText = loose_font.render(f"Score: {score}", True, (0, 0, 200))
         scoreRect = scoreText.get_rect(center=(250, 200))
         screen.blit(scoreText, scoreRect)
+
+        bestScoreText = loose_font.render(f"Best Score: {best_score}", True, (0, 0, 200))
+        bestScoreRect = bestScoreText.get_rect(center=(250, 300))
+        screen.blit(bestScoreText, bestScoreRect)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
