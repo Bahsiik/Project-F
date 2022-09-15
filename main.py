@@ -1,11 +1,12 @@
-import random
-
-import pygame
+import pygame, random, os
 
 pygame.init()
 pygame.display.set_caption("Project F")
 screen = pygame.display.set_mode((500, 700))
 clock = pygame.time.Clock()
+file = open("BestScore.txt", "r")
+best_score = int(file.read())
+file.close()
 
 
 class Button:
@@ -84,6 +85,7 @@ def main_menu():
 
 
 def game():
+    global best_score
     score = 0
     scoreText = pygame.font.Font('freesansbold.ttf', 32)
 
@@ -102,6 +104,7 @@ def game():
     running = True
     scoreFlag = False
     pauseFlag = False
+    collisionFLag = False
 
     while running:
         clock.tick(60)
@@ -144,9 +147,15 @@ def game():
         if redSquareY < 0:
             redSquareY = 0
 
-        obstacleX += obstacleXChange
         if obstacleX < 40 and not scoreFlag:
             score += 1
+            if score > best_score:
+                best_score = score
+                if os.path.exists("BestScore.txt"):
+                    file = open("BestScore.txt", "w")
+                    file.write(str(best_score))
+                    file.close()
+            print(best_score)
             scoreFlag = True
 
         if obstacleX < -60:
@@ -154,9 +163,12 @@ def game():
             obstacleHeight = random.randint(200, 400)
             scoreFlag = False
 
+        obstacleX += obstacleXChange
         if detectCollision(obstacleHeight, obstacleHeight + 250, obstacleX, redSquareY):
             obstacleXChange = 0
             redSquareYChange = 0
+            collisionFLag = True
+            loose_menu(score)
         else:
             if score > 20:
                 obstacleXChange = -6
@@ -177,8 +189,8 @@ def displayObstacle(topObstacleHeight, obstacleX, obstacleColor, obstacleWidth):
 
 
 def detectCollision(topObstacleHeight, bottomObstacleHeight, obstacleX, redSquareY):
-    if 40 <= obstacleX <= 200:
-        if redSquareY <= topObstacleHeight or redSquareY >= (bottomObstacleHeight - 100):
+    if 45 <= obstacleX <= 195:
+        if redSquareY <= topObstacleHeight - 3 or redSquareY >= (bottomObstacleHeight - 98):
             return True
     return False
 
@@ -211,6 +223,40 @@ def pause_menu():
         resume_button.is_hovered()
         if resume_button.is_clicked():
             return False
+
+        quit_button.draw()
+        quit_button.is_hovered()
+        if quit_button.is_clicked():
+            main_menu()
+
+        pygame.display.update()
+        clock.tick(60)
+
+
+def loose_menu(score):
+    loose_font = pygame.font.SysFont(None, 100)
+    game_font = pygame.font.SysFont(None, 70)
+    play_again_button = Button(150, 275, 200, 100, "Retry", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    quit_button = Button(150, 425, 200, 100, "Quit", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+    while True:
+
+        titleText = loose_font.render("You Loose", True, (0, 0, 200))
+        titleRect = titleText.get_rect(center=(250, 100))
+        screen.blit(titleText, titleRect)
+
+        scoreText = loose_font.render(f"Score: {score}", True, (0, 0, 200))
+        scoreRect = scoreText.get_rect(center=(250, 200))
+        screen.blit(scoreText, scoreRect)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        play_again_button.draw()
+        play_again_button.is_hovered()
+        if play_again_button.is_clicked():
+            game()
 
         quit_button.draw()
         quit_button.is_hovered()
