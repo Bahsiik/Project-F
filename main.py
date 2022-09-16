@@ -39,11 +39,10 @@ class Button:
             return False
 
     def is_clicked(self):
-        click = pygame.mouse.get_pressed()
-        if click[0] == 1 and self.is_hovered():
-            return True
-        else:
-            return False
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and self.is_hovered():
+                return True
+        return False
 
 
 def main_menu():
@@ -59,26 +58,28 @@ def main_menu():
         titleRect = titleText.get_rect(center=(250, 100))
         screen.blit(titleText, titleRect)
 
+        play_button.draw()
+        play_button.is_hovered()
+
+        score_button.draw()
+        score_button.is_hovered()
+
+        quit_button.draw()
+        quit_button.is_hovered()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-        play_button.draw()
-        play_button.is_hovered()
-        if play_button.is_clicked():
-            game()
-
-        score_button.draw()
-        score_button.is_hovered()
-        # if score_button.is_clicked():
-        # score()
-
-        quit_button.draw()
-        quit_button.is_hovered()
-        if quit_button.is_clicked():
-            pygame.quit()
-            quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if play_button.is_hovered():
+                    game()
+                if score_button.is_hovered():
+                    print("Score Clicked")
+                    # score_menu()
+                if quit_button.is_hovered():
+                    pygame.quit()
+                    quit()
 
         pygame.display.update()
         clock.tick(60)
@@ -205,11 +206,18 @@ def pause_menu():
     game_font = pygame.font.SysFont(None, 70)
     resume_button = Button(150, 225, 200, 100, "Resume", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
     quit_button = Button(150, 375, 200, 100, "Quit", (150, 150, 0), (255, 255, 255), game_font, 70, (0, 0, 150))
+
     while True:
 
         titleText = pause_font.render("Paused", True, (0, 0, 200))
         titleRect = titleText.get_rect(center=(250, 100))
         screen.blit(titleText, titleRect)
+
+        resume_button.draw()
+        resume_button.is_hovered()
+
+        quit_button.draw()
+        quit_button.is_hovered()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -218,16 +226,11 @@ def pause_menu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return False
-
-        resume_button.draw()
-        resume_button.is_hovered()
-        if resume_button.is_clicked():
-            return False
-
-        quit_button.draw()
-        quit_button.is_hovered()
-        if quit_button.is_clicked():
-            main_menu()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if resume_button.is_hovered():
+                    return False
+                if quit_button.is_hovered():
+                    main_menu()
 
         pygame.display.update()
         clock.tick(60)
@@ -252,20 +255,21 @@ def loose_menu(score):
         bestScoreRect = bestScoreText.get_rect(center=(250, 300))
         screen.blit(bestScoreText, bestScoreRect)
 
+        play_again_button.draw()
+        play_again_button.is_hovered()
+
+        quit_button.draw()
+        quit_button.is_hovered()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-        play_again_button.draw()
-        play_again_button.is_hovered()
-        if play_again_button.is_clicked():
-            game()
-
-        quit_button.draw()
-        quit_button.is_hovered()
-        if quit_button.is_clicked():
-            main_menu()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if play_again_button.is_hovered():
+                    game()
+                if quit_button.is_hovered():
+                    main_menu()
 
         pygame.display.update()
         clock.tick(60)
